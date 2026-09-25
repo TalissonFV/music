@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { toRaw } from 'vue';
 import { useLibraryStore } from './libraryStore';
 
 export const useImportStore = defineStore('import', {
@@ -51,9 +52,10 @@ export const useImportStore = defineStore('import', {
       });
 
       try {
+        const rawResult = JSON.parse(JSON.stringify(toRaw(this.importResult)));
         await window.api.downloadMissingTracks({
-          playlistName: this.importResult.playlistTitle || 'Imported Playlist',
-          missingTracks: this.importResult.missingTracks
+          playlistName: rawResult.playlistTitle || 'Imported Playlist',
+          missingTracks: rawResult.missingTracks || []
         });
         
         const libraryStore = useLibraryStore();
