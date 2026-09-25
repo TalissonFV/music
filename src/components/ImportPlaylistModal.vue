@@ -64,9 +64,9 @@
             </div>
             <div class="flex gap-2">
               <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full text-xs font-semibold">
-                {{ importStore.importResult.matchedCount }} Matched locally
+                {{ importStore.importResult.matchedCount }} Matched / Downloaded
               </span>
-              <span class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-full text-xs font-semibold">
+              <span v-if="importStore.importResult.missingCount > 0" class="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/30 rounded-full text-xs font-semibold">
                 {{ importStore.importResult.missingCount }} Missing
               </span>
             </div>
@@ -103,24 +103,25 @@
             <p class="text-xs text-brand-subtext truncate">{{ importStore.downloadProgress.trackName }}</p>
           </div>
 
-          <!-- Matched & Missing Track Lists -->
+          <!-- Track List -->
           <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
-            <!-- Matched Tracks -->
-            <div v-for="item in importStore.importResult.matchedTracks" :key="item.trackName" class="flex items-center justify-between p-2.5 bg-brand-card/40 rounded-lg text-xs">
+            <!-- Matched / Downloaded Tracks -->
+            <div v-for="item in importStore.importResult.matchedTracks" :key="item.trackName" class="flex items-center justify-between p-2.5 bg-brand-card/40 rounded-lg text-xs border border-emerald-500/20">
               <div class="truncate">
                 <span class="font-semibold text-white">{{ item.trackName }}</span>
                 <span class="text-brand-subtext ml-2">— {{ item.artistName }}</span>
               </div>
-              <span class="text-emerald-400 font-bold shrink-0">✓ Matched</span>
+              <span class="text-emerald-400 font-bold shrink-0">{{ item.statusTag || '✓ Matched' }}</span>
             </div>
 
             <!-- Missing Tracks -->
             <div v-for="item in importStore.importResult.missingTracks" :key="item.trackName" class="flex items-center justify-between p-2.5 bg-amber-500/5 rounded-lg text-xs border border-amber-500/20">
               <div class="truncate">
-                <span class="font-semibold text-amber-200">{{ item.trackName }}</span>
+                <span :class="['font-semibold', item.downloaded ? 'text-emerald-300' : 'text-amber-200']">{{ item.trackName }}</span>
                 <span class="text-brand-subtext ml-2">— {{ item.artistName }}</span>
               </div>
-              <span class="text-amber-400 font-bold shrink-0">Missing</span>
+              <span v-if="item.downloaded" class="text-emerald-400 font-bold shrink-0">✓ Downloaded</span>
+              <span v-else class="text-amber-400 font-bold shrink-0">Missing</span>
             </div>
           </div>
         </div>

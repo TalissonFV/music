@@ -47,6 +47,24 @@ export const useLibraryStore = defineStore('library', {
       }
     },
 
+    async deleteSong(songId) {
+      if (!window.api) return;
+      await window.api.deleteSong(songId);
+      await this.loadLibrary();
+    },
+
+    async deleteMultipleSongs(songIds) {
+      if (!window.api) return;
+      await window.api.deleteMultipleSongs(songIds);
+      await this.loadLibrary();
+    },
+
+    async updateSong(songId, updatedFields) {
+      if (!window.api) return;
+      await window.api.updateSong(songId, updatedFields);
+      await this.loadLibrary();
+    },
+
     async createPlaylist(name) {
       if (!window.api || !name) return;
       await window.api.createPlaylist(name);

@@ -22,7 +22,7 @@ export const useImportStore = defineStore('import', {
     },
 
     closeModal() {
-      if (this.isDownloading) return; // don't close while downloading
+      if (this.isDownloading) return;
       this.showModal = false;
     },
 
@@ -49,6 +49,16 @@ export const useImportStore = defineStore('import', {
 
       const removeListener = window.api.onDownloadProgress((data) => {
         this.downloadProgress = data;
+
+        if (data.trackName && this.importResult && this.importResult.missingTracks) {
+          const track = this.importResult.missingTracks.find(t =>
+            t.trackName.toLowerCase() === data.trackName.toLowerCase() ||
+            data.trackName.toLowerCase().includes(t.trackName.toLowerCase())
+          );
+          if (track) {
+            track.downloaded = true;
+          }
+        }
       });
 
       try {
@@ -57,11 +67,22 @@ export const useImportStore = defineStore('import', {
           playlistName: rawResult.playlistTitle || 'Imported Playlist',
           missingTracks: rawResult.missingTracks || []
         });
-        
+
+        // Update modal UI state: move downloaded tracks to matched list
+        if (this.importResult && this.importResult.missingTracks) {
+          const downloadedItems = this.importResult.missingTracks.map(t => ({
+            ...t,
+            statusTag: '✓ Downloaded'
+          }));
+
+          this.importResult.matchedTracks.push(...downloadedItems);
+          this.importResult.matchedCount += downloadedItems.length;
+          this.importResult.missingCount = 0;
+          this.importResult.missingTracks = [];
+        }
+
         const libraryStore = useLibraryStore();
         await libraryStore.loadLibrary();
-        
-        this.closeModal();
       } catch (err) {
         console.error('Download failed:', err);
         this.errorMessage = err.message || 'Failed to download missing tracks.';
